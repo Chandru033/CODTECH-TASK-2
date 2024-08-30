@@ -4,17 +4,7 @@ import re
 from datetime import datetime
 
 def scan_ports(host, start_port, end_port):
-    """
-    Scan a host for open ports.
-
-    Args:
-        host (str): The host to scan.
-        start_port (int): The starting port number.
-        end_port (int): The ending port number.
-
-    Returns:
-        list: A list of open ports.
-    """
+   
     open_ports = []
     for port in range(start_port, end_port + 1):
         try:
@@ -29,15 +19,7 @@ def scan_ports(host, start_port, end_port):
     return open_ports
 
 def check_software_versions(host):
-    """
-    Check the software versions of a host.
-
-    Args:
-        host (str): The host to check.
-
-    Returns:
-        dict: A dictionary of software versions.
-    """
+    
     software_versions = {}
     try:
         response = requests.get(f"http://{host}/", timeout=5)
@@ -54,15 +36,7 @@ def check_software_versions(host):
     return software_versions
 
 def check_configurations(host):
-    """
-    Check the configurations of a host.
-
-    Args:
-        host (str): The host to check.
-
-    Returns:
-        dict: A dictionary of configurations.
-    """
+   
     configurations = {}
     try:
         response = requests.get(f"http://{host}/robots.txt", timeout=5)
