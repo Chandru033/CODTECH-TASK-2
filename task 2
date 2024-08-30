@@ -1,0 +1,104 @@
+import socket
+import requests
+import re
+from datetime import datetime
+
+def scan_ports(host, start_port, end_port):
+    """
+    Scan a host for open ports.
+
+    Args:
+        host (str): The host to scan.
+        start_port (int): The starting port number.
+        end_port (int): The ending port number.
+
+    Returns:
+        list: A list of open ports.
+    """
+    open_ports = []
+    for port in range(start_port, end_port + 1):
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(1)
+            result = sock.connect_ex((host, port))
+            if result == 0:
+                open_ports.append(port)
+            sock.close()
+        except socket.error:
+            pass
+    return open_ports
+
+def check_software_versions(host):
+    """
+    Check the software versions of a host.
+
+    Args:
+        host (str): The host to check.
+
+    Returns:
+        dict: A dictionary of software versions.
+    """
+    software_versions = {}
+    try:
+        response = requests.get(f"http://{host}/", timeout=5)
+        server_header = response.headers.get("Server")
+        if server_header:
+            match = re.search(r"Apache/(\d+\.\d+\.\d+)", server_header)
+            if match:
+                software_versions["Apache"] = match.group(1)
+            match = re.search(r"nginx/(\d+\.\d+\.\d+)", server_header)
+            if match:
+                software_versions["Nginx"] = match.group(1)
+    except requests.RequestException:
+        pass
+    return software_versions
+
+def check_configurations(host):
+    """
+    Check the configurations of a host.
+
+    Args:
+        host (str): The host to check.
+
+    Returns:
+        dict: A dictionary of configurations.
+    """
+    configurations = {}
+    try:
+        response = requests.get(f"http://{host}/robots.txt", timeout=5)
+        if response.status_code == 200:
+            configurations["Robots.txt"] = "Accessible"
+        else:
+            configurations["Robots.txt"] = "Not accessible"
+    except requests.RequestException:
+        pass
+    return configurations
+
+def main():
+    print("Vulnerability Scanning Tool")
+    host = input("Enter the host to scan: ")
+    start_port = int(input("Enter the starting port number: "))
+    end_port = int(input("Enter the ending port number: "))
+
+    print("Scanning ports...")
+    open_ports = scan_ports(host, start_port, end_port)
+    print("Open ports:")
+    for port in open_ports:
+        print(port)
+
+    print("Checking software versions...")
+    software_versions = check_software_versions(host)
+    print("Software versions:")
+    for software, version in software_versions.items():
+        print(f"{software}: {version}")
+
+    print("Checking configurations...")
+    configurations = check_configurations(host)
+    print("Configurations:")
+    for config, status in configurations.items():
+        print(f"{config}: {status}")
+
+    print("Scan completed at", datetime.now())
+
+if __name__ == "__main__":
+    main()
